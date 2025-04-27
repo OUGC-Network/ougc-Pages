@@ -32,30 +32,14 @@ use MyBB;
 use pluginSystem;
 use session;
 
-use function add_breadcrumb;
-use function admin_redirect;
-use function draw_admin_pagination;
-use function flash_message;
-use function htmlspecialchars_uni;
-use function is_member;
-use function log_admin_action;
-use function multipage;
-use function my_date;
-use function my_strpos;
-use function my_strtolower;
-use function ougc_getpreview;
 use function ougc\Pages\Admin\pluginInfo;
 
-use function output_page;
-
-use function preg_replace;
-use function uniqid;
-use function usercp_menu;
-
+use const TIME_NOW;
 use const MYBB_ROOT;
 use const ougc\Pages\Admin\FIELDS_DATA_CATEGORIES;
 use const ougc\Pages\Admin\FIELDS_DATA_PAGES;
-use const TIME_NOW;
+use const ougc\Pages\DEBUG;
+use const ougc\Pages\ROOT;
 
 const URL = 'index.php?module=config-ougc_pages';
 
@@ -159,17 +143,38 @@ function runHooks(string $hookName, &$pluginArguments = ''): bool
     return true;
 }
 
-function templateGetName(string $templateSuffix): string
+function templateGetName(string $templateName = ''): string
 {
-    return "ougcpages_{$templateSuffix}";
+    $templatePrefix = '';
+
+    if ($templateName) {
+        $templatePrefix = '_';
+    }
+
+    return "ougcpages{$templatePrefix}{$templateName}";
+}
+
+function templateGet(string $templateName = '', bool $enableHTMLComments = true): string
+{
+    global $templates;
+
+    if (DEBUG && file_exists($filePath = ROOT . "/templates/{$templateName}.html")) {
+        $templateContents = file_get_contents($filePath);
+
+        $templates->cache[templateGetName($templateName)] = $templateContents;
+    } elseif (my_strpos($templateName, '/') !== false) {
+        $templateName = substr($templateName, strpos($templateName, '/') + 1);
+    }
+
+    return $templates->render(templateGetName($templateName), true, $enableHTMLComments);
 }
 
 function getSetting(string $settingKey = '')
 {
     global $mybb;
 
-    return isset(SETTINGS[$settingKey]) ? SETTINGS[$settingKey] : (
-    isset($mybb->settings['ougc_pages_' . $settingKey]) ? $mybb->settings['ougc_pages_' . $settingKey] : false
+    return SETTINGS[$settingKey] ?? (
+        $mybb->settings['ougc_pages_' . $settingKey] ?? false
     );
 }
 
@@ -299,7 +304,7 @@ function importGetUrl(string $importName, string $importUrl = ''): string
 
 function cacheUpdate()
 {
-    require_once OUGC_PAGES_ROOT . '/admin.php';
+    require_once ROOT . '/admin.php';
 
     global $db, $cache;
 
@@ -577,9 +582,9 @@ function initRun(): bool
 
         $categoryInput = my_strtolower($mybb->get_input('category'));
 
-        foreach ($categoriesCache as $cid => $categoryData) {
+        foreach ($categoriesCache as $categoryID2 => $categoryData) {
             if ($categoryData['url'] === $categoryInput) {
-                $categoryID = $cid;
+                $categoryID = $categoryID2;
 
                 break;
             }
@@ -608,13 +613,13 @@ function initRun(): bool
 
         $pageInput = my_strtolower($mybb->get_input('page'));
 
-        foreach ($pagesCache as $pid => $pageData) {
+        foreach ($pagesCache as $pageID2 => $pageData) {
             if ($pageData['url'] === $pageInput) {
-                $pageID = $pid;
-
-                $categoryID = $pageData['cid'];
+                $categoryID = (int)$pageData['cid'];
 
                 $categoryData = $categoriesCache[$categoryID];
+
+                $pageID = $pageID2;
 
                 break;
             }
@@ -769,6 +774,8 @@ function initShow()
 
         $pageData = pageGet($pageID);
 
+        $categoryID = (int)$pageData['cid'];
+
         $categoryData = categoryGet($pageData['cid']);
     }
 
@@ -779,9 +786,9 @@ function initShow()
         $lang->load("ougc_pages_{$pageData['pid']}", false, true);
     }
 
-    $categoryData['name'] = htmlspecialchars_uni($categoryData['name']);
+    $categoryName = htmlspecialchars_uni($categoryData['name']);
 
-    if ($categoryData['wrapucp']) {
+    if ($categoryData['wrapucp'] && !$categoryData['wrapNavigation']) {
         $lang->load('usercp');
 
         if ($mybb->user['uid'] && $mybb->usergroup['canusercp']) {
@@ -790,7 +797,7 @@ function initShow()
     }
 
     if (!$isPage || $categoryData['breadcrumb']) {
-        add_breadcrumb($categoryData['name'], categoryGetLink($categoryData['cid']));
+        add_breadcrumb($categoryName, categoryGetLink($categoryData['cid']));
     }
 
     $navigation = ['previousPage' => '', 'nextPage' => ''];
@@ -798,26 +805,26 @@ function initShow()
     $lastEditedMessage = '';
 
     if (!empty($pageData)) {
-        $title = $pageData['name'] = htmlspecialchars_uni($pageData['name']);
+        $title = $pageName = htmlspecialchars_uni($pageData['name']);
 
         $description = $pageData['description'] = htmlspecialchars_uni($pageData['description']);
 
         $canonicalUrl = pageGetLink($pageID);
 
-        add_breadcrumb($pageData['name'], pageGetLink($pageData['pid']));
+        add_breadcrumb($pageName, pageGetLink($pageData['pid']));
 
         if ($categoryData['displayNavigation']) {
             if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {
                 $previousPageLink = pageGetLink($pagesCache[$pageID]['previousPageID']);
                 $previousPageName = htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['previousPageID']]['name']);
 
-                $navigation['previousPage'] = eval($templates->render('ougcpages_navigation_previous'));
+                $navigation['previousPage'] = eval(templateGet('navigation_previous'));
             }
             if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['nextPageID'])) {
                 $nextPageLink = pageGetLink($pagesCache[$pageID]['nextPageID']);
                 $nextPageName = htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['nextPageID']]['name']);
 
-                $navigation['nextPage'] = eval($templates->render('ougcpages_navigation_next'));
+                $navigation['nextPage'] = eval(templateGet('navigation_next'));
             }
         }
 
@@ -828,16 +835,16 @@ function initShow()
 
             $editDateRelative = my_date('relative', $pageData['dateline']);
 
-            $lastEditedMessage = eval($templates->render('ougcpages_wrapper_edited'));
+            $lastEditedMessage = eval(templateGet('wrapper_edited'));
         }
 
-        $content = eval($templates->render('ougcpages_temporary_tmpl'));
+        $content = eval(templateGet('temporary_tmpl'));
 
         if ($pageData['wrapper']) {
-            $content = eval($templates->render('ougcpages_wrapper'));
+            $content = eval(templateGet('wrapper'));
         }
     } else {
-        $title = htmlspecialchars_uni($categoryData['name']);
+        $title = $categoryName;
 
         $description = htmlspecialchars_uni($categoryData['description']);
 
@@ -847,7 +854,7 @@ function initShow()
 
         $pageList = '';
 
-        foreach ($pageCache as $pid => $pageData) {
+        foreach ($pageCache as $pageID => $pageData) {
             if (
                 (int)$categoryData['cid'] !== (int)$pageData['cid'] ||
                 !is_member($pageData['allowedGroups'])
@@ -857,28 +864,36 @@ function initShow()
 
             $pageName = htmlspecialchars_uni($pageData['name']);
 
-            $pageLink = pageGetLink($pid);
+            $pageLink = pageGetLink($pageID);
 
-            $pageList .= eval($templates->render('ougcpages_category_list_item'));
+            $pageList .= eval(templateGet('category_list_item'));
         }
 
         if (!$pageList) {
-            $content = eval($templates->render('ougcpages_category_list_empty'));
+            $content = eval(templateGet('category_list_empty'));
         } else {
-            $content = eval($templates->render('ougcpages_category_list'));
+            $content = eval(templateGet('category_list'));
         }
 
-        $content = eval($templates->render('ougcpages_wrapper'));
+        $content = eval(templateGet('wrapper'));
     }
 
-    if ($categoryData['wrapucp']) {
+    if ($categoryData['wrapNavigation']) {
+        $navigationWidth = 180;
+
+        $navigationMenu = navigationBuild();
+
+        $categoryUrl = categoryGetLink($categoryID);
+
+        $content = eval(templateGet('wrapper_navigation'));
+    } elseif ($categoryData['wrapucp']) {
         global $usercpnav;
 
         require_once MYBB_ROOT . 'inc/functions_user.php';
 
         usercp_menu();
 
-        $content = eval($templates->render('ougcpages_wrapper_ucp'));
+        $content = eval(templateGet('wrapper_ucp'));
     }
 
     $pageContent = eval($templates->render('ougcpages'));
@@ -1043,7 +1058,7 @@ function categoryBuildLink(string $categoryName, int $categoryID): string
 
     $categoryName = htmlspecialchars_uni($categoryName);
 
-    return eval($templates->render('ougcpages_category_link'));
+    return eval(templateGet('category_link'));
 }
 
 function categoryBuildSelect(): array
@@ -1223,5 +1238,65 @@ function pageBuildLink(string $pageName, int $pageID): string
 
     $pageName = htmlspecialchars_uni($pageName);
 
-    return eval($templates->render('ougcpages_page_link'));
+    return eval(templateGet('page_link'));
+}
+
+function navigationBuild(): string
+{
+    global $cache, $db, $templates, $mybb, $theme;
+    global $collapsed, $collapsedimg, $collapsed, $collapse, $ucp_nav_home;
+
+
+    $navigationCode = '';
+
+    foreach (cacheGetCategories() as $categoryID => $categoryData) {
+        if ((!$categoryData['wrapucp'] && !$categoryData['wrapNavigation']) ||
+            !is_member($categoryData['allowedGroups'])) {
+            continue;
+        }
+
+        $pageCache = cacheGetPages();
+
+        $pageList = '';
+
+        foreach ($pageCache as $pageID => $pageData) {
+            if ($categoryID !== (int)$pageData['cid'] || !is_member($pageData['allowedGroups'])) {
+                continue;
+            }
+
+            $pageName = htmlspecialchars_uni($pageData['name']);
+
+            $pageLink = pageGetLink($pageID);
+
+            $pageList .= eval(templateGet('wrapper_ucp_nav_item'));
+        }
+
+        if (!$pageList) {
+            continue;
+        }
+
+        $categoryName = htmlspecialchars_uni($categoryData['name']);
+
+        $collapseID = 'usercpougcpages' . $categoryID;
+
+        $collapse || $collapse = [];
+
+        $expanderText = (in_array($collapseID, $collapse)) ? '[+]' : '[-]';
+
+        if (!isset($collapsedImage[$collapseID])) {
+            $collapsedImage[$collapseID] = '';
+        }
+
+        if (!isset($collapsed[$collapseID . '_e'])) {
+            $collapsed[$collapseID . '_e'] = '';
+        }
+
+        $collapseImage = $collapsedImage[$collapseID];
+
+        $collapsedE = $collapsed[$collapseID . '_e'];
+
+        $navigationCode .= eval(templateGet('wrapper_ucp_nav'));
+    }
+
+    return $navigationCode;
 }

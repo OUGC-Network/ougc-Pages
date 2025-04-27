@@ -31,25 +31,17 @@ namespace ougc\Pages\Admin;
 use DirectoryIterator;
 use MyBB;
 
-use function change_admin_permission;
-use function file_get_contents;
-use function json_decode;
-use function my_number_format;
-use function my_strlen;
-use function pathinfo;
-use function print_selection_javascript;
-use function update_theme_stylesheet_list;
-
 use function ougc\Pages\Core\cacheUpdate;
 use function ougc\Pages\Core\loadLanguage;
 use function ougc\Pages\Core\loadPluginLibrary;
 use function ougc\Pages\Core\sanitizeIntegers;
-use function ougc\Pages\Core\templateGetName;
+use function ougc\Pages\Core\templateGet;
 use function ougc\Pages\Core\getSetting;
 
+use const TIME_NOW;
 use const MYBB_ADMIN_DIR;
 use const ougc\Pages\Core\EXECUTION_HOOK_GLOBAL_END;
-use const TIME_NOW;
+use const ougc\Pages\ROOT;
 
 const FIELDS_DATA_CATEGORIES = [
     'cid' => [
@@ -120,6 +112,13 @@ const FIELDS_DATA_CATEGORIES = [
         'cache' => true
     ],
     'wrapucp' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 0,
+        'cache' => true
+    ],
+    'wrapNavigation' => [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
@@ -265,7 +264,7 @@ function pluginActivate()
     loadPluginLibrary();
 
     // Add settings
-    $settingsContents = file_get_contents(OUGC_PAGES_ROOT . '/settings.json');
+    $settingsContents = file_get_contents(ROOT . '/settings.json');
 
     $settingsData = json_decode($settingsContents, true);
 
@@ -286,7 +285,7 @@ function pluginActivate()
     );
 
     // Add templates
-    $templatesDirIterator = new DirectoryIterator(OUGC_PAGES_ROOT . '/templates');
+    $templatesDirIterator = new DirectoryIterator(ROOT . '/templates');
 
     $templates = [];
 
@@ -708,13 +707,7 @@ function pageFormBuildFields(
                             ['id' => $fieldKey, 'multiple' => true, 'size' => 5]
                         );
 
-                        return eval(
-                        $templates->render(
-                            templateGetName('adminGroupSelect'),
-                            true,
-                            false
-                        )
-                        );
+                        return eval(templateGet('adminGroupSelect', false));
                     } elseif ($formType == 'basicSelect') {
                         if ($fieldKey === 'init' && !$mybb->get_input($fieldKey, MyBB::INPUT_INT)) {
                             $mybb->input[$fieldKey] = EXECUTION_HOOK_GLOBAL_END;

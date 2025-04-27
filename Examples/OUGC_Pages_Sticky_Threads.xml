@@ -68,13 +68,13 @@ $navigation = ['previousPage' => '', 'nextPage' => ''];
 
 $lastEditedMessage = '';
 
-$title = $pageData['name'] = \htmlspecialchars_uni($pageData['name']);
+$title = $pageName = \htmlspecialchars_uni($pageData['name']);
 
 $description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
 
 $canonicalUrl = \ougc\Pages\Core\pageGetLink($pageID);
 
-\add_breadcrumb($pageData['name'], \ougc\Pages\Core\pageGetLink($pageID));
+\add_breadcrumb($pageName, \ougc\Pages\Core\pageGetLink($pageID));
 
 $lang->load("forumdisplay");
 

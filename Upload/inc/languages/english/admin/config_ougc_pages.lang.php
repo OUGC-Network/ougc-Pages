@@ -85,6 +85,8 @@ $l['ougc_pages_form_category_buildMenu_desc'] = 'Enable to build a dropdown menu
 //$l['ougc_pages_form_category_buildMenu_footer'] = 'Footer';
 $l['ougc_pages_form_category_wrapucp'] = 'Wrap UserCP Menu';
 $l['ougc_pages_form_category_wrapucp_desc'] = 'If enabled, a section will be added to the UserCP for browsing this category and the category will be wrapped as if it was a UserCP section. Beware of errors if you allow guest access.';
+$l['ougc_pages_form_category_wrapNavigation'] = 'Wrap Navigation Menu';
+$l['ougc_pages_form_category_wrapNavigation_desc'] = 'If enabled, a navigation section will be added when browsing this category and the category will be wrapped as if it was a navigation menu.';
 
 $l['ougc_pages_form_page_cid'] = 'Category';
 $l['ougc_pages_form_page_cid_desc'] = 'Select the category this page belongs to.';

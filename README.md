@@ -153,6 +153,7 @@ erDiagram
         int displayNavigation "1 for displaying previous/next navigation inside pages"
         int buildMenu "1 for building a category menu"
         int wrapucp "1 to wrap the category inside the UserCP sidebar"
+        int wrapNavigation "1 to wrap the category inside a sidebar"
     }
     PAGES {
         int pid PK "page identifier"
@@ -324,6 +325,12 @@ _Administrator Control Panel_.
     - _front end_; used when page `wrapper` is `1`
 - `ougcpages_wrapper_edited`
     - _front end_; used page category `wrapper` is `1`
+- `ougcpages_wrapper_navigation`
+    - _front end_; used when category `wrapNavigation` is `1`
+- `ougcpages_wrapper_navigation_nav`
+    - _front end_; used when category `wrapNavigation` is `1`
+- `ougcpages_wrapper_navigation_nav_item`
+    - _front end_; used when category `wrapNavigation` is `1`
 - `ougcpages_wrapper_ucp`
     - _front end_; used when category `wrapucp` is `1`
 - `ougcpages_wrapper_ucp_nav`
@@ -471,6 +478,7 @@ Provides a list of available variables, functions, and methods for plugins to us
     - `(int) displayNavigation`
     - `(int) buildMenu`
     - `(int) wrapucp`
+    - `(int) wrapNavigation`
 - `(array) $pagesCache` array containing cached pages data when `visible` is equal to `1` and `allowedGroups` is not
   empty, ordered by `pid, disporder`, array key is set to page identifier `pid`:
     - `(int) cid`
@@ -502,6 +510,7 @@ Provides a list of available variables, functions, and methods for plugins to us
     - `(int) displayNavigation`
     - `(int) buildMenu`
     - `(int) wrapucp`
+    - `(int) wrapNavigation`
 - `(array) $pageData` array containing current page, empty when `$isPage` is `false`.
     - `(int) cid`
     - `(string) name`
@@ -542,6 +551,7 @@ Provides a list of available variables, functions, and methods for plugins to us
         - `(int) displayNavigation`
         - `(int) buildMenu`
         - `(int) wrapucp`
+        - `(int) wrapNavigation`
 - `oucPagesCategoryDeleteEnd` Variable passed by reference:
     - `(int) $categoryID` deleted page identifier.
 - `oucPagesPageInsertEnd` Array object is passed by reference with the following variables:

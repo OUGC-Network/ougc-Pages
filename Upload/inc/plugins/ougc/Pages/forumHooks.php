@@ -28,11 +28,6 @@
 
 namespace ougc\Pages\ForumHooks;
 
-use function explode;
-use function html_entity_decode;
-use function htmlspecialchars_uni;
-use function is_member;
-use function my_strpos;
 use function ougc\Pages\Core\cacheGetCategories;
 use function ougc\Pages\Core\cacheGetPages;
 use function ougc\Pages\Core\categoryGetByUrl;
@@ -40,12 +35,12 @@ use function ougc\Pages\Core\categoryGetLink;
 use function ougc\Pages\Core\getSetting;
 use function ougc\Pages\Core\initExecute;
 use function ougc\Pages\Core\loadlanguage;
+use function ougc\Pages\Core\navigationBuild;
 use function ougc\Pages\Core\pageGetByUrl;
 use function ougc\Pages\Core\pageGetLink;
 use function ougc\Pages\Core\pageGetLinkBase;
 use function ougc\Pages\Core\runHooks;
-use function parse_url;
-use function str_replace;
+use function ougc\Pages\Core\templateGet;
 
 function fetch_wol_activity_end(&$activityObjects): array
 {
@@ -126,10 +121,12 @@ function build_friendly_wol_location_end(&$locationObjects): array
         }
 
         if (!empty($pageData)) {
+            $pageName = htmlspecialchars_uni($pageData['name']);
+
             $locationObjects['location_name'] = $lang->sprintf(
                 $lang->ougc_pages_wol_page,
                 pageGetLink($pageData['pid']),
-                htmlspecialchars_uni($pageData['name'])
+                $pageName
             );
         }
     }
@@ -170,61 +167,9 @@ function usercp_menu40(bool $forceRun = false) // maybe later allow custom prior
         return;
     }
 
-    global $cache, $db, $templates, $mybb, $usercpmenu, $collapsed, $theme, $collapsedimg, $collapsed, $collapse, $ucp_nav_home;
+    global $usercpmenu;
 
-    $categoriesCache = cacheGetCategories();
-
-    if (empty($categoriesCache)) {
-        return;
-    }
-
-    foreach ($categoriesCache as $cid => $categoryData) {
-        if (!$categoryData['wrapucp'] || !is_member($categoryData['allowedGroups'])) {
-            continue;
-        }
-
-        $pageCache = cacheGetPages();
-
-        $pageList = '';
-
-        foreach ($pageCache as $pid => $pageData) {
-            if ((int)$cid !== (int)$pageData['cid'] || !is_member($pageData['allowedGroups'])) {
-                continue;
-            }
-
-            $pageName = htmlspecialchars_uni($pageData['name']);
-
-            $pageLink = pageGetLink($pid);
-
-            $pageList .= eval($templates->render('ougcpages_wrapper_ucp_nav_item'));
-        }
-
-        if (!$pageList) {
-            continue;
-        }
-
-        $categoryName = htmlspecialchars_uni($categoryData['name']);
-
-        $collapseID = 'usercpougcpages' . $cid;
-
-        $collapse || $collapse = [];
-
-        $expanderText = (in_array($collapseID, $collapse)) ? '[+]' : '[-]';
-
-        if (!isset($collapsedImage[$collapseID])) {
-            $collapsedImage[$collapseID] = '';
-        }
-
-        if (!isset($collapsed[$collapseID . '_e'])) {
-            $collapsed[$collapseID . '_e'] = '';
-        }
-
-        $collapseImage = $collapsedImage[$collapseID];
-
-        $collapsedE = $collapsed[$collapseID . '_e'];
-
-        $usercpmenu .= eval($templates->render('ougcpages_wrapper_ucp_nav'));
-    }
+    $usercpmenu .= navigationBuild();
 }
 
 function global_start()
@@ -310,18 +255,18 @@ function pre_output_page(string &$pageContents): string
 
             $pageUrl = pageGetLinkBase($pageID);
 
-            $menuItems .= eval($templates->render('ougcpages_menu_item'));
+            $menuItems .= eval(templateGet('menu_item'));
         }
 
         if (!$menuItems) {
             continue;
         }
 
-        $menuList .= eval($templates->render('ougcpages_menu'));
+        $menuList .= eval(templateGet('menu'));
     }
 
     if ($menuList) {
-        $menuList .= eval($templates->render('ougcpages_menu_css'));
+        $menuList .= eval(templateGet('menu_css'));
     }
 
     $pageContents = str_replace('<!--OUGC_PAGES_FOOTER-->', $menuList, $pageContents);

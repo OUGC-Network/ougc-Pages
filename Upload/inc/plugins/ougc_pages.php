@@ -34,28 +34,31 @@ use function ougc\Pages\Admin\pluginUninstall;
 use function ougc\Pages\Core\addHooks;
 use function ougc\Pages\Core\cacheUpdate;
 
-defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
+use const ougc\Pages\ROOT;
 
-const OUGC_PAGES_ROOT = MYBB_ROOT . 'inc/plugins/ougc/Pages';
+defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
 
 // Plugin Settings
 define('ougc\Pages\Core\SETTINGS', [
-    'enableEval' => false
+    'enableEval' => true
 ]);
 
-require_once OUGC_PAGES_ROOT . '/core.php';
+define('ougc\Pages\DEBUG', false);
 
-// PLUGINLIBRARY
+define('ougc\Pages\ROOT', constant('MYBB_ROOT') . 'inc/plugins/ougc/Pages');
+
+require_once ROOT . '/core.php';
+
 defined('PLUGINLIBRARY') or define('PLUGINLIBRARY', MYBB_ROOT . 'inc/plugins/pluginlibrary.php');
 
 // Add our hooks
 if (defined('IN_ADMINCP')) {
-    require_once OUGC_PAGES_ROOT . '/admin.php';
-    require_once OUGC_PAGES_ROOT . '/adminHooks.php';
+    require_once ROOT . '/admin.php';
+    require_once ROOT . '/adminHooks.php';
 
     addHooks('ougc\Pages\adminHooks');
 } else {
-    require_once OUGC_PAGES_ROOT . '/forumHooks.php';
+    require_once ROOT . '/forumHooks.php';
 
     addHooks('ougc\Pages\ForumHooks');
 }

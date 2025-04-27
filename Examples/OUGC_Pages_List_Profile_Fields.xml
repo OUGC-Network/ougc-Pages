@@ -60,7 +60,7 @@ $templates->cache(
 isset($templates->cache['ougcpages_listuserfields']) or $templates->cache['ougcpages_listuserfields'] = <<<EOF
 <table border="0" cellspacing="{\$theme['borderwidth']}" cellpadding="{\$theme['tablespace']}" class="tborder">
 	<tr>
-		<td class="thead" colspan="{\$colspan}"><strong>{\$pageData['name']}</strong></td>
+		<td class="thead" colspan="{\$colspan}"><strong>{\$pageName}</strong></td>
 	</tr>
 	<tr>
 		<td class="tcat">User</td>
@@ -451,13 +451,13 @@ $navigation = ['previousPage' => '', 'nextPage' => ''];
 
 $lastEditedMessage = '';
 
-$title = $pageData['name'] = \htmlspecialchars_uni($pageData['name']);
+$title = $pageName = \htmlspecialchars_uni($pageData['name']);
 
 $description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
 
 $canonicalUrl = \ougc\Pages\Core\pageGetLink($pageID);
 
-\add_breadcrumb($pageData['name'], \ougc\Pages\Core\pageGetLink($pageID));
+\add_breadcrumb($pageName, \ougc\Pages\Core\pageGetLink($pageID));
 
 if (!empty($categoryData['navigation'])) {
     if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {

@@ -97,9 +97,9 @@ if ($categoryData['breadcrumb']) {
     \add_breadcrumb($categoryData['name'], \ougc\Pages\Core\categoryGetLink($categoryID));
 }
 
-$pageData['name'] = htmlspecialchars_uni($pageData['name']);
+$pageName = htmlspecialchars_uni($pageData['name']);
 
-\add_breadcrumb($pageData['name'], \ougc\Pages\Core\pageGetLink($pageID));
+\add_breadcrumb($pageName, \ougc\Pages\Core\pageGetLink($pageID));
 
 if ($mybb->settings['threadsperpage'] < 1) {
     $mybb->settings['threadsperpage'] = 20;

@@ -30,10 +30,11 @@ namespace ougc\Pages\AdminHooks;
 
 use MyBB;
 
-use function admin_redirect;
 use function ougc\Pages\Admin\pluginActivate;
 use function ougc\Pages\Admin\pluginInfo;
 use function ougc\Pages\Core\loadLanguage;
+
+use const ougc\Pages\ROOT;
 
 function admin_config_plugins_deactivate(): bool
 {
@@ -99,7 +100,7 @@ function admin_load()
         return;
     }
 
-    require OUGC_PAGES_ROOT . "/admin/module.php";
+    require ROOT . '/admin/module.php';
 }
 
 function admin_config_permissions(&$permissionActions): array

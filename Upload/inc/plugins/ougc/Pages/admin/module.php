@@ -26,8 +26,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-// Die if IN_MYBB is not defined, for security reasons.
-
 use function ougc\Pages\Admin\categoryFormBuildFields;
 use function ougc\Pages\Admin\categoryFormCheckFields;
 use function ougc\Pages\Admin\categoryFormParseFields;
@@ -59,7 +57,7 @@ use function ougc\Pages\Core\pageQuery;
 use function ougc\Pages\Core\pageUpdate;
 use function ougc\Pages\Core\parseUrl;
 use function ougc\Pages\Core\redirect;
-use function ougc\Pages\Core\templateGetName;
+use function ougc\Pages\Core\templateGet;
 use function ougc\Pages\Core\urlBuild;
 use function ougc\Pages\Core\urlSet;
 
@@ -161,13 +159,7 @@ if ($mybb->get_input('manage') == 'pages') {
         }
 
         if (!empty($admin_options['codepress'])) {
-            $page->extra_header .= eval(
-            $templates->render(
-                templateGetName('adminCodeMirror'),
-                true,
-                false
-            )
-            );
+            $page->extra_header .= eval(templateGet('adminCodeMirror', false));
         }
 
         $page->output_header($lang->ougc_pages_manage);
@@ -288,13 +280,7 @@ if ($mybb->get_input('manage') == 'pages') {
         $formObject->end();
 
         if (!empty($admin_options['codepress'])) {
-            echo eval(
-            $templates->render(
-                templateGetName('adminCodeMirrorFooter'),
-                true,
-                false
-            )
-            );
+            echo eval(templateGet('adminCodeMirrorFooter', false));
         }
 
         $page->output_footer();
@@ -659,13 +645,7 @@ if ($mybb->get_input('manage') == 'pages') {
                 }
 
                 $tableObject->construct_cell(
-                    eval(
-                    $templates->render(
-                        templateGetName('adminPageName'),
-                        true,
-                        false
-                    )
-                    )
+                    eval(templateGet('adminPageName', false))
                 );
 
                 $tableObject->construct_cell(
@@ -694,13 +674,7 @@ if ($mybb->get_input('manage') == 'pages') {
                 }
 
                 $tableObject->construct_cell(
-                    eval(
-                    $templates->render(
-                        templateGetName('adminCategoryStatus'),
-                        true,
-                        false
-                    )
-                    ),
+                    eval(templateGet('adminCategoryStatus', false)),
                     ['class' => 'align_center']
                 );
 
@@ -981,13 +955,7 @@ if ($mybb->get_input('manage') == 'pages') {
                 }
 
                 $tableObject->construct_cell(
-                    eval(
-                    $templates->render(
-                        templateGetName('adminCategoryName'),
-                        true,
-                        false
-                    )
-                    )
+                    eval(templateGet('adminCategoryName', false))
                 );
 
                 $tableObject->construct_cell(
@@ -1016,13 +984,7 @@ if ($mybb->get_input('manage') == 'pages') {
                 }
 
                 $tableObject->construct_cell(
-                    eval(
-                    $templates->render(
-                        templateGetName('adminCategoryStatus'),
-                        true,
-                        false
-                    )
-                    ),
+                    eval(templateGet('adminCategoryStatus', false)),
                     ['class' => 'align_center']
                 );
 
