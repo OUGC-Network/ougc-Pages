@@ -26,14 +26,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-// Boring stuff..
 use function ougc\Pages\Core\initRun;
 use function ougc\Pages\Core\initShow;
 use function ougc\Pages\Core\loadLanguage;
 use function ougc\Pages\Core\runHooks;
 
-define('IN_MYBB', true);
-define('THIS_SCRIPT', 'pages.php');
+const IN_MYBB = true;
+const THIS_SCRIPT = 'pages.php';
 
 $workingDirectory = dirname(__FILE__);
 
@@ -55,7 +54,7 @@ if (isset($templatelist)) {
     $templatelist = '';
 }
 
-$templatelist .= 'ougcpages_category_list_item, ougcpages_category_list, ougcpages_wrapper, usercp_nav_messenger, usercp_nav_messenger_tracking, usercp_nav_messenger_compose, usercp_nav_messenger_folder, usercp_nav_changename, usercp_nav_editsignature, usercp_nav_profile, usercp_nav_attachments, usercp_nav_misc, ougcpages_wrapper_ucp_nav_item, ougcpages_wrapper_ucp_nav, usercp_nav_home, usercp_nav, ougcpages_wrapper_ucp, ougcpages, ougcpages_category_list_empty, ougcpages_navigation_previous, ougcpages_navigation_next, ougcpages_wrapper_edited';
+$templatelist .= 'ougcpages_category_list_item, ougcpages_category_list, ougcpages_wrapper, usercp_nav_messenger, usercp_nav_messenger_tracking, usercp_nav_messenger_compose, usercp_nav_messenger_folder, usercp_nav_changename, usercp_nav_editsignature, usercp_nav_profile, usercp_nav_attachments, usercp_nav_misc, ougcpages_wrapper_ucp_nav_item, ougcpages_wrapper_ucp_nav, usercp_nav_home, usercp_nav, ougcpages_wrapper_ucp, ougcpages, ougcpages_category_list_empty, ougcpages_navigation_previous, ougcpages_navigation_next, ougcpages_wrapper_edited, ougcpages_wrapper_navigation_section, ougcpages_wrapper_navigation_section_item';
 
 initRun();
 

@@ -169,7 +169,10 @@ function usercp_menu40(bool $forceRun = false) // maybe later allow custom prior
 
     global $usercpmenu;
 
-    $usercpmenu .= navigationBuild();
+    $usercpmenu .= navigationBuild(
+        defined('OUGC_PAGES_STATUS_IS_PAGE') ? OUGC_PAGES_STATUS_IS_PAGE : 0,
+        'wrapper_ucp_nav'
+    );
 }
 
 function global_start()

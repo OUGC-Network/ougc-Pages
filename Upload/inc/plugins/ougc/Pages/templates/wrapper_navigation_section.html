@@ -1,0 +1,14 @@
+<tbody>
+<tr>
+    <td class="tcat tcat_menu tcat_collapse{$collapseImage}">
+        <div class="expcolimage">
+            <img src="{$theme['imgdir']}/collapse{$collapseImage}.png" id="{$collapseID}_img" class="expander"
+                 alt="{$expanderText}" title="{$expanderText}"/>
+        </div>
+        <div><span class="smalltext"><strong>{$categoryName}</strong></span></div>
+    </td>
+</tr>
+</tbody>
+<tbody style="{$collapsedE}" id="{$collapseID}_e">
+{$pageList}
+</tbody>

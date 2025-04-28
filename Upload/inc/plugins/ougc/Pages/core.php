@@ -852,22 +852,26 @@ function initShow()
 
         $pageCache = cacheGetPages();
 
-        $pageList = '';
+        $pageList = (function () use ($pageCache, $categoryData): string {
+            $pageList = '';
 
-        foreach ($pageCache as $pageID => $pageData) {
-            if (
-                (int)$categoryData['cid'] !== (int)$pageData['cid'] ||
-                !is_member($pageData['allowedGroups'])
-            ) {
-                continue;
+            foreach ($pageCache as $pageID => $pageData) {
+                if (
+                    (int)$categoryData['cid'] !== (int)$pageData['cid'] ||
+                    !is_member($pageData['allowedGroups'])
+                ) {
+                    continue;
+                }
+
+                $pageName = htmlspecialchars_uni($pageData['name']);
+
+                $pageLink = pageGetLink($pageID);
+
+                $pageList .= eval(templateGet('category_list_item'));
             }
 
-            $pageName = htmlspecialchars_uni($pageData['name']);
-
-            $pageLink = pageGetLink($pageID);
-
-            $pageList .= eval(templateGet('category_list_item'));
-        }
+            return $pageList;
+        })();
 
         if (!$pageList) {
             $content = eval(templateGet('category_list_empty'));
@@ -881,7 +885,7 @@ function initShow()
     if ($categoryData['wrapNavigation']) {
         $navigationWidth = 180;
 
-        $navigationMenu = navigationBuild();
+        $navigationMenu = navigationBuild($pageID);
 
         $categoryUrl = categoryGetLink($categoryID);
 
@@ -1241,11 +1245,14 @@ function pageBuildLink(string $pageName, int $pageID): string
     return eval(templateGet('page_link'));
 }
 
-function navigationBuild(): string
+function navigationBuild(int $selectedPageID, string $templatePrefix = 'wrapper_navigation_section'): string
 {
     global $cache, $db, $templates, $mybb, $theme;
-    global $collapsed, $collapsedimg, $collapsed, $collapse, $ucp_nav_home;
+    global $collapsed, $collapsedimg, $collapse, $ucp_nav_home;
 
+    $collapsedimg = $collapsedimg ?? [];
+
+    $collapsedImage = &$collapsedimg;
 
     $navigationCode = '';
 
@@ -1255,9 +1262,15 @@ function navigationBuild(): string
             continue;
         }
 
+        if ($categoryData['wrapNavigation'] && THIS_SCRIPT !== 'pages.php') {
+            continue;
+        }
+
         $pageCache = cacheGetPages();
 
         $pageList = '';
+
+        $alternativeBackground = alt_trow(true);
 
         foreach ($pageCache as $pageID => $pageData) {
             if ($categoryID !== (int)$pageData['cid'] || !is_member($pageData['allowedGroups'])) {
@@ -1268,7 +1281,15 @@ function navigationBuild(): string
 
             $pageLink = pageGetLink($pageID);
 
-            $pageList .= eval(templateGet('wrapper_ucp_nav_item'));
+            $currentPageClass = '';
+
+            if ($selectedPageID && $selectedPageID === $pageID) {
+                $currentPageClass = 'currentPageActive';
+            }
+
+            $pageList .= eval(templateGet($templatePrefix . '_item'));
+
+            $alternativeBackground = alt_trow();
         }
 
         if (!$pageList) {
@@ -1295,7 +1316,7 @@ function navigationBuild(): string
 
         $collapsedE = $collapsed[$collapseID . '_e'];
 
-        $navigationCode .= eval(templateGet('wrapper_ucp_nav'));
+        $navigationCode .= eval(templateGet($templatePrefix));
     }
 
     return $navigationCode;

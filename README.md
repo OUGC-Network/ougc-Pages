@@ -327,9 +327,9 @@ _Administrator Control Panel_.
     - _front end_; used page category `wrapper` is `1`
 - `ougcpages_wrapper_navigation`
     - _front end_; used when category `wrapNavigation` is `1`
-- `ougcpages_wrapper_navigation_nav`
+- `ougcpages_wrapper_navigation_section`
     - _front end_; used when category `wrapNavigation` is `1`
-- `ougcpages_wrapper_navigation_nav_item`
+- `ougcpages_wrapper_navigation_section_item`
     - _front end_; used when category `wrapNavigation` is `1`
 - `ougcpages_wrapper_ucp`
     - _front end_; used when category `wrapucp` is `1`
