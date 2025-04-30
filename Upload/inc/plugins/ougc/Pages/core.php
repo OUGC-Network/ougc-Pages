@@ -885,7 +885,7 @@ function initShow()
     if ($categoryData['wrapNavigation']) {
         $navigationWidth = 180;
 
-        $navigationMenu = navigationBuild($pageID);
+        $navigationMenu = navigationBuild($pageID, 'wrapper_navigation_section', $categoryID);
 
         $categoryUrl = categoryGetLink($categoryID);
 
@@ -1245,8 +1245,11 @@ function pageBuildLink(string $pageName, int $pageID): string
     return eval(templateGet('page_link'));
 }
 
-function navigationBuild(int $selectedPageID, string $templatePrefix = 'wrapper_navigation_section'): string
-{
+function navigationBuild(
+    int $selectedPageID,
+    string $templatePrefix = 'wrapper_navigation_section',
+    int $parseOnlyCategoryID = 0
+): string {
     global $cache, $db, $templates, $mybb, $theme;
     global $collapsed, $collapsedimg, $collapse, $ucp_nav_home;
 
@@ -1258,11 +1261,9 @@ function navigationBuild(int $selectedPageID, string $templatePrefix = 'wrapper_
 
     foreach (cacheGetCategories() as $categoryID => $categoryData) {
         if ((!$categoryData['wrapucp'] && !$categoryData['wrapNavigation']) ||
-            !is_member($categoryData['allowedGroups'])) {
-            continue;
-        }
-
-        if ($categoryData['wrapNavigation'] && THIS_SCRIPT !== 'pages.php') {
+            !is_member($categoryData['allowedGroups']) ||
+            $categoryData['wrapNavigation'] && !$parseOnlyCategoryID ||
+            $parseOnlyCategoryID && $parseOnlyCategoryID !== $categoryID) {
             continue;
         }
 

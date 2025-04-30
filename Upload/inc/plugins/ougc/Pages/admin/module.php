@@ -778,6 +778,12 @@ if ($mybb->get_input('manage') == 'pages') {
 
                 categoryFormParseFields($formData);
 
+                if (!empty($formData['wrapNavigation']) && isset($formData['wrapucp'])) {
+                    $formData['wrapucp'] = 0;
+                } elseif (!empty($formData['wrapucp']) && isset($formData['wrapNavigation'])) {
+                    $formData['wrapNavigation'] = 0;
+                }
+
                 if ($newCategory) {
                     $categoryID = categoryInsert($formData);
                 } else {
