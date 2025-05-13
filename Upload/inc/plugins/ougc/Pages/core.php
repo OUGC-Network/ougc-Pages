@@ -840,6 +840,8 @@ function initShow()
 
         $content = eval(templateGet('temporary_tmpl'));
 
+        // todo, parse message if setting ?
+        
         if ($pageData['wrapper']) {
             $content = eval(templateGet('wrapper'));
         }

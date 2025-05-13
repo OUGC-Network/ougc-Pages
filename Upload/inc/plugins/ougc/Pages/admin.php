@@ -28,8 +28,8 @@
 
 namespace ougc\Pages\Admin;
 
-use DirectoryIterator;
 use MyBB;
+use DirectoryIterator;
 
 use function ougc\Pages\Core\cacheUpdate;
 use function ougc\Pages\Core\loadLanguage;

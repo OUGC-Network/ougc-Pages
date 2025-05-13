@@ -41,3 +41,4 @@ $l['ougc_pages_wol_page'] = 'Viewing page <a href="{1}">{2}</a>.';
 $l['ougc_pages_wol_category'] = 'Viewing page category <a href="{1}">{2}</a>.';
 
 $l['ougc_pages_page_edited'] = 'Last edited';
+

@@ -59,12 +59,17 @@ $l['ougc_pages_tab_page_edit_desc'] = 'Here you can update a existing page.';
 $l['ougc_pages_tab_page_import'] = 'Import Page';
 $l['ougc_pages_tab_page_import_desc'] = 'Here you can import a new page.';
 
+$l['ougc_pages_form_preconfigured'] = 'Preconfigured Page';
+$l['ougc_pages_form_preconfigured_desc'] = 'Select a page from the default package.';
 $l['ougc_pages_form_import'] = 'Local File';
 $l['ougc_pages_form_import_desc'] = 'Select the XML file to import from your computer.';
 $l['ougc_pages_form_import_url'] = 'URL File';
 $l['ougc_pages_form_import_url_desc'] = 'Insert the URL of the XML file to import.';
 $l['ougc_pages_form_import_ignore_version'] = 'Ignore Version Compatibility';
 $l['ougc_pages_form_import_ignore_version_desc'] = 'Should this page be imported regardless of the version of OUGC Pages or Page Manager it was created for?';
+
+$l['error_preconfigured_file'] = 'There was an error with the selected preconfigured file.';
+$l['error_url_file'] = 'There was an error trying to download the url file.';
 
 $l['ougc_pages_form_category_name'] = 'Category Name';
 $l['ougc_pages_form_category_name_desc'] = 'Display name for this category.';

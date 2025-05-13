@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MyBB PluginLibrary XML-Export :: 2023-05-29T05:48:54+00:00 -->
+<array>
+    <element>
+        <key>name</key>
+        <value>Forum stats signature</value>
+    </element>
+    <element>
+        <key>description</key>
+        <value>A dynamically generated signature image that displays stats about your forum.</value>
+    </element>
+    <element>
+        <key>url</key>
+        <value>signature</value>
+    </element>
+    <element>
+        <key>allowedGroups</key>
+        <value>-1</value>
+    </element>
+    <element>
+        <key>php</key>
+        <value type="INT">1</value>
+    </element>
+    <element>
+        <key>wol</key>
+        <value type="INT">0</value>
+    </element>
+    <element>
+        <key>visible</key>
+        <value type="INT">1</value>
+    </element>
+    <element>
+        <key>wrapper</key>
+        <value type="INT">0</value>
+    </element>
+    <element>
+        <key>init</key>
+        <value type="INT">1</value>
+    </element>
+    <element>
+        <key>template</key>
+        <value><![CDATA[<?php
+
+$signSettings = [
+    'title' => 'Members: {1} | Threads: {2} | Posts: {3}',
+    'image' => 'cache/stats.png',
+    'bburl' => $mybb->settings['bburl'],
+];
+
+if (!file_exists(MYBB_ROOT . $signSettings['image'])) {
+    return;
+}
+
+$permissions = $mybb->usergroup = \usergroup_permissions(1);
+
+$whereClause = ["active!='0'"];
+
+if ($unviewableForums = \get_unviewable_forums(true)) {
+    $whereClause[] = "fid NOT IN ({$unviewableForums})";
+}
+
+if ($inactiveForums = \get_inactive_forums()) {
+    $whereClause[] = "fid NOT IN ({$inactiveForums})";
+}
+
+$dbQuery = $db->simple_select('forums', 'SUM(threads) AS threads, SUM(posts) as posts', implode(' AND ', $whereClause));
+
+$statsData = $db->fetch_array($dbQuery);
+
+$dbQuery = $db->simple_select('users', 'COUNT(uid) AS users', 'usergroup NOT IN (1, 5)');
+
+$statsData['users'] = $db->fetch_field($dbQuery, 'users');
+
+foreach ($statsData as $k => &$statValue) {
+    $statValue = \my_number_format((int)$statValue);
+}
+
+unset($statKey, $statValue);
+
+// This is the title
+$title = $lang->sprintf($signSettings['title'], $statsData['users'], $statsData['threads'], $statsData['posts']);
+
+if (my_strlen($title) > 40) {
+    $title = my_substr($title, 0, 40 - 1) . '..';
+}
+
+if (!$title) {
+    return;
+}
+
+header('Content-type: image/png');
+
+header('Content-disposition: inline; filename="' . $mybb->settings['bbname'] . '.png"');
+
+$image = imageCreateFromPNG(MYBB_ROOT . $signSettings['image']);
+
+imagestring($image, 2, 180, 10, $title, ImageColorAllocate($image, 0, 0, 0));
+
+if ($signSettings['bburl']) {
+    imagestring($image, 1, 300, 28, $signSettings['bburl'], ImageColorAllocate($image, 255, 255, 255));
+}
+
+imagepng($image);
+imagedestroy($image);
+
+exit;]]></value>
+    </element>
+    <element>
+        <key>versioncode</key>
+        <value type="INT">1833</value>
+    </element>
+</array>
+        <!-- End of file. -->

@@ -59,12 +59,17 @@ $l['ougc_pages_tab_page_edit_desc'] = 'Aquí puedes editar una página.';
 $l['ougc_pages_tab_page_import'] = 'Importar Página';
 $l['ougc_pages_tab_page_import_desc'] = 'Aquí puedes importar una página.';
 
+$l['ougc_pages_form_preconfigured'] = 'Pagina Preconfigurada';
+$l['ougc_pages_form_preconfigured_desc'] = 'Selecciona una pagina del paquete predeterminado.';
 $l['ougc_pages_form_import'] = 'Archivo Local';
 $l['ougc_pages_form_import_desc'] = 'Selecciona el archivo XML a importar desde tu dispositivo.';
 $l['ougc_pages_form_import_url'] = 'URL del Archivo';
 $l['ougc_pages_form_import_url_desc'] = 'Inserta la URL del archivo XML a importar.';
 $l['ougc_pages_form_import_ignore_version'] = 'Ignorar la Compatibilidad de Version';
 $l['ougc_pages_form_import_ignore_version_desc'] = 'Selecciona esta opción para importar una página sin importar la version para la cual fue generada.';
+
+$l['error_preconfigured_file'] = 'Hubo un error con la pagina preconfigurada.';
+$l['error_url_file'] = 'Hubo un error al descargar el archivo de URL.';
 
 $l['ougc_pages_form_category_name'] = 'Nombre de la Categoría';
 $l['ougc_pages_form_category_name_desc'] = 'Nombre a mostrar para esta categoría.';

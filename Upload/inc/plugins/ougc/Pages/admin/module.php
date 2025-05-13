@@ -26,15 +26,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-use function ougc\Pages\Admin\categoryFormBuildFields;
-use function ougc\Pages\Admin\categoryFormCheckFields;
-use function ougc\Pages\Admin\categoryFormParseFields;
-use function ougc\Pages\Admin\categoryFormSetFields;
-use function ougc\Pages\Admin\pageFormBuildFields;
-use function ougc\Pages\Admin\pageFormCheckFields;
-use function ougc\Pages\Admin\pageFormParseFields;
-use function ougc\Pages\Admin\pageFormSetFields;
-use function ougc\Pages\Admin\pluginInfo;
 use function ougc\Pages\Core\cacheUpdate;
 use function ougc\Pages\Core\categoryBuildLink;
 use function ougc\Pages\Core\categoryBuildSelect;
@@ -60,7 +51,17 @@ use function ougc\Pages\Core\redirect;
 use function ougc\Pages\Core\templateGet;
 use function ougc\Pages\Core\urlBuild;
 use function ougc\Pages\Core\urlSet;
+use function ougc\Pages\Admin\pluginInfo;
+use function ougc\Pages\Admin\categoryFormBuildFields;
+use function ougc\Pages\Admin\categoryFormCheckFields;
+use function ougc\Pages\Admin\categoryFormParseFields;
+use function ougc\Pages\Admin\categoryFormSetFields;
+use function ougc\Pages\Admin\pageFormBuildFields;
+use function ougc\Pages\Admin\pageFormCheckFields;
+use function ougc\Pages\Admin\pageFormParseFields;
+use function ougc\Pages\Admin\pageFormSetFields;
 
+use const ougc\Pages\ROOT;
 use const ougc\Pages\Admin\FIELDS_DATA_PAGES;
 use const ougc\Pages\Core\EXECUTION_HOOK_GLOBAL_END;
 use const ougc\Pages\Core\EXECUTION_HOOK_GLOBAL_INTERMEDIATE;
@@ -365,9 +366,16 @@ if ($mybb->get_input('manage') == 'pages') {
         if ($mybb->request_method == 'post') {
             $errors = [];
 
-            if ($mybb->get_input('file_url')) {
-                if (!($contents = fetch_remote_file($mybb->get_input('file_url')))) {
-                    $errors[] = $lang->error_local_file;
+            if ($mybb->get_input('preconfigured_file') !== '' || $mybb->get_input('file_url') != '') {
+                if ($mybb->get_input('preconfigured_file') !== '') {
+                    $filePath = ROOT . '/pages/' . basename($mybb->get_input('preconfigured_file'));
+
+                    if (file_exists($filePath)) {
+                        $contents = file_get_contents($filePath);
+                    }
+                } elseif ($mybb->get_input('file_url') !== '' &&
+                    !($contents = fetch_remote_file($mybb->get_input('file_url')))) {
+                    $errors[] = $lang->error_url_file;
                 }
             } elseif ($_FILES['local_file'] && $_FILES['local_file']['error'] != 4) {
                 // Find out if there was an error with the uploaded file
@@ -532,10 +540,37 @@ if ($mybb->get_input('manage') == 'pages') {
                 $page->output_inline_error($errors);
             }
         }
+        $templatesDirIterator = new DirectoryIterator(ROOT . '/pages');
+
+        $preconfiguredPagesFiles = ['' => $lang->none];
+
+        foreach ($templatesDirIterator as $template) {
+            if (!$template->isFile()) {
+                continue;
+            }
+
+            $pathName = $template->getPathname();
+
+            $pathInfo = pathinfo($pathName);
+
+            if ($pathInfo['extension'] === 'xml') {
+                $preconfiguredPagesFiles[$pathInfo['basename']] = html_entity_decode($pathInfo['filename']);
+            }
+        }
 
         $form = new Form(urlBuild(['action' => 'import']), 'post', '', true);
 
         $formContainer = new FormContainer($moduleTabs['pageImport']['description']);
+
+        $formContainer->output_row(
+            $lang->ougc_pages_form_preconfigured,
+            $lang->ougc_pages_form_preconfigured_desc,
+            $form->generate_select_box(
+                'preconfigured_file',
+                $preconfiguredPagesFiles,
+                $mybb->get_input('preconfigured_file')
+            )
+        );
 
         $formContainer->output_row(
             $lang->ougc_pages_form_import,

@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MyBB PluginLibrary XML-Export :: 2023-05-29T05:48:34+00:00 -->
+<array>
+    <element>
+        <key>name</key>
+        <value>Profile Fields</value>
+    </element>
+    <element>
+        <key>description</key>
+        <value>Allow users to update their custom profile fields.</value>
+    </element>
+    <element>
+        <key>url</key>
+        <value>profile-field</value>
+    </element>
+    <element>
+        <key>allowedGroups</key>
+        <value>-1</value>
+    </element>
+    <element>
+        <key>php</key>
+        <value type="INT">1</value>
+    </element>
+    <element>
+        <key>wol</key>
+        <value type="INT">1</value>
+    </element>
+    <element>
+        <key>visible</key>
+        <value type="INT">1</value>
+    </element>
+    <element>
+        <key>wrapper</key>
+        <value type="INT">0</value>
+    </element>
+    <element>
+        <key>init</key>
+        <value type="INT">4</value>
+    </element>
+    <element>
+        <key>template</key>
+        <value><![CDATA[<?php
+
+define('OUGC_PAGES_PROFILE_FIELDS', '1,2,3'); // -1 for all, comma separated for specifics
+
+$templates->cache(
+    'ougcpages_profilefields, member_profile_customfields_field_multi_item, member_profile_customfields_field_multi, member_profile_customfields_field, usercp_profile_profilefields_select_option, usercp_profile_profilefields_multiselect, usercp_profile_profilefields_select_option, usercp_profile_profilefields_select, usercp_profile_profilefields_radio, usercp_profile_profilefields_checkbox, usercp_profile_profilefields_textarea, usercp_profile_profilefields_text, usercp_profile_customfield, member_profile_customfields'
+);
+
+$pfcache = $backup_cache = $cache->read('profilefields');
+
+if (is_array($pfcache)) {
+    // Then loop through the profile fields.
+    foreach ($pfcache as $key => $profilefield) {
+        if (!is_member(OUGC_PAGES_PROFILE_FIELDS, ['usergroup' => $profilefield['fid'], 'additionalgroups' => ''])) {
+            unset($pfcache[$key]);
+        }
+    }
+}
+
+$cache->cache['profilefields'] = $pfcache;
+
+$lang->load('member');
+
+$lang->load('usercp');
+
+$errors = $message = '';
+
+$page_url = \ougc\Pages\Core\pageGetLink($pageID);
+
+if ($mybb->request_method == 'post' && $mybb->get_input('action') == 'update') {
+    // Verify incoming POST request
+    verify_post_check($mybb->get_input('my_post_key'));
+
+    require_once MYBB_ROOT . 'inc/datahandlers/user.php';
+
+    $userhandler = new UserDataHandler('update');
+
+    $userhandler->set_data([
+        "uid" => $mybb->user['uid'],
+        "profile_fields" => $mybb->get_input('profile_fields', MyBB::INPUT_ARRAY),
+    ]);
+
+    if (!$userhandler->validate_user()) {
+        $errors = $userhandler->get_friendly_errors();
+
+        $errors = inline_error($errors);
+    } else {
+        $userhandler->update_user();
+
+        redirect($page_url, $lang->redirect_profileupdated);
+    }
+}
+
+if (!is_object($parser)) {
+    require_once MYBB_ROOT . 'inc/class_parser.php';
+
+    $parser = new postParser;
+}
+
+$bgcolor = alt_trow(true);
+
+$lang->users_additional_info = 'Your Profile Information';
+
+$customfields = '';
+
+if (is_array($pfcache)) {
+    foreach ($pfcache as $customfield) {
+        $thing = explode("\n", $customfield['type'], "2");
+        $type = trim($thing[0]);
+
+        $customfieldval = $customfield_val = '';
+        $field = "fid{$customfield['fid']}";
+
+        if (isset($mybb->user[$field])) {
+            $useropts = explode("\n", $mybb->user[$field]);
+            $customfieldval = $comma = '';
+            if (is_array($useropts) && ($type == "multiselect" || $type == "checkbox")) {
+                foreach ($useropts as $val) {
+                    if ($val != '') {
+                        eval(
+                            "\$customfield_val .= \"" . $templates->get(
+                                "member_profile_customfields_field_multi_item"
+                            ) . "\";"
+                        );
+                    }
+                }
+                if ($customfield_val != '') {
+                    eval("\$customfieldval = \"" . $templates->get("member_profile_customfields_field_multi") . "\";");
+                }
+            } else {
+                $parser_options = [
+                    "allow_html" => $customfield['allowhtml'],
+                    "allow_mycode" => $customfield['allowmycode'],
+                    "allow_smilies" => $customfield['allowsmilies'],
+                    "allow_imgcode" => $customfield['allowimgcode'],
+                    "allow_videocode" => $customfield['allowvideocode'],
+                    #"nofollow_on" => 1,
+                    "filter_badwords" => 1,
+                ];
+
+                if ($customfield['type'] == "textarea") {
+                    $parser_options['me_username'] = $mybb->user['username'];
+                } else {
+                    $parser_options['nl2br'] = 0;
+                }
+
+                if ($mybb->user['showimages'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestimages'] != 1 && $mybb->user['uid'] == 0) {
+                    $parser_options['allow_imgcode'] = 0;
+                }
+
+                $customfieldval = $parser->parse_message($mybb->user[$field], $parser_options);
+            }
+        }
+
+        if ($customfieldval) {
+            $customfield['name'] = \htmlspecialchars_uni((string)$customfield['name']);
+            eval("\$customfields .= \"" . $templates->get("member_profile_customfields_field") . "\";");
+            $bgcolor = alt_trow();
+        }
+    }
+}
+
+if (!empty($customfields)) {
+    $message .= eval($templates->render("member_profile_customfields"));
+}
+
+// Custom profile fields baby!
+$altbg = alt_trow(true);
+$customfields = '';
+
+$profileFieldsInput = $mybb->get_input('profile_fields', \MyBB::INPUT_ARRAY);
+
+if (is_array($pfcache)) {
+    foreach ($pfcache as $profilefield) {
+        $profilefield['type'] = \htmlspecialchars_uni((string)$profilefield['type']);
+        $profilefield['name'] = \htmlspecialchars_uni((string)$profilefield['name']);
+        $profilefield['description'] = \htmlspecialchars_uni((string)$profilefield['description']);
+        $thing = explode("\n", $profilefield['type'], "2");
+        $type = $thing[0];
+        if (isset($thing[1])) {
+            $options = $thing[1];
+        } else {
+            $options = [];
+        }
+        $field = "fid{$profilefield['fid']}";
+        $select = '';
+        if ($errors) {
+            if (!isset($profileFieldsInput[$field])) {
+                $profileFieldsInput[$field] = '';
+            }
+            $userfield = $profileFieldsInput[$field];
+        } else {
+            $userfield = $mybb->user[$field];
+        }
+        if ($type == "multiselect") {
+            if ($errors) {
+                $useropts = $userfield;
+            } else {
+                $useropts = explode("\n", $userfield);
+            }
+            if (is_array($useropts)) {
+                foreach ($useropts as $key => $val) {
+                    $val = \htmlspecialchars_uni((string)$val);
+                    $seloptions[$val] = $val;
+                }
+            }
+            $expoptions = explode("\n", $options);
+            if (is_array($expoptions)) {
+                foreach ($expoptions as $key => $val) {
+                    $val = trim($val);
+                    $val = str_replace("\n", "\\n", $val);
+
+                    $sel = "";
+                    if (isset($seloptions[$val]) && $val == $seloptions[$val]) {
+                        $sel = " selected=\"selected\"";
+                    }
+
+                    eval("\$select .= \"" . $templates->get("usercp_profile_profilefields_select_option") . "\";");
+                }
+                if (!$profilefield['length']) {
+                    $profilefield['length'] = 3;
+                }
+
+                eval("\$code = \"" . $templates->get("usercp_profile_profilefields_multiselect") . "\";");
+            }
+        } elseif ($type == "select") {
+            $expoptions = explode("\n", $options);
+            if (is_array($expoptions)) {
+                foreach ($expoptions as $key => $val) {
+                    $val = trim($val);
+                    $val = str_replace("\n", "\\n", $val);
+                    $sel = "";
+                    if ($val == \htmlspecialchars_uni((string)$userfield)) {
+                        $sel = " selected=\"selected\"";
+                    }
+
+                    eval("\$select .= \"" . $templates->get("usercp_profile_profilefields_select_option") . "\";");
+                }
+                if (!$profilefield['length']) {
+                    $profilefield['length'] = 1;
+                }
+
+                eval("\$code = \"" . $templates->get("usercp_profile_profilefields_select") . "\";");
+            }
+        } elseif ($type == "radio") {
+            $userfield = \htmlspecialchars_uni((string)$userfield);
+            $expoptions = explode("\n", $options);
+            if (is_array($expoptions)) {
+                foreach ($expoptions as $key => $val) {
+                    $checked = "";
+                    if ($val == $userfield) {
+                        $checked = " checked=\"checked\"";
+                    }
+
+                    eval("\$code .= \"" . $templates->get("usercp_profile_profilefields_radio") . "\";");
+                }
+            }
+        } elseif ($type == "checkbox") {
+            $userfield = \htmlspecialchars_uni((string)$userfield);
+            if ($errors) {
+                $useropts = $userfield;
+            } else {
+                $useropts = explode("\n", $userfield);
+            }
+            if (is_array($useropts)) {
+                foreach ($useropts as $key => $val) {
+                    $seloptions[$val] = $val;
+                }
+            }
+            $expoptions = explode("\n", $options);
+            if (is_array($expoptions)) {
+                foreach ($expoptions as $key => $val) {
+                    $checked = "";
+                    if (isset($seloptions[$val]) && $val == $seloptions[$val]) {
+                        $checked = " checked=\"checked\"";
+                    }
+
+                    eval("\$code .= \"" . $templates->get("usercp_profile_profilefields_checkbox") . "\";");
+                }
+            }
+        } elseif ($type == "textarea") {
+            $value = \htmlspecialchars_uni((string)$userfield);
+            eval("\$code = \"" . $templates->get("usercp_profile_profilefields_textarea") . "\";");
+        } else {
+            $value = \htmlspecialchars_uni((string)$userfield);
+            $maxlength = "";
+            if ($profilefield['maxlength'] > 0) {
+                $maxlength = " maxlength=\"{$profilefield['maxlength']}\"";
+            }
+
+            eval("\$code = \"" . $templates->get("usercp_profile_profilefields_text") . "\";");
+        }
+
+        eval("\$customfields .= \"" . $templates->get("usercp_profile_customfield") . "\";");
+
+        $altbg = alt_trow();
+        $code = "";
+        $select = "";
+        $val = "";
+        $options = "";
+        $expoptions = "";
+        $useropts = "";
+        $seloptions = [];
+    }
+}
+
+isset($templates->cache['ougcpages_profilefields']) or $templates->cache['ougcpages_profilefields'] = <<<EOF
+{\$errors}
+<form action="{\$page_url}" method="post" name="input">
+<input type="hidden" name="my_post_key" value="{$mybb->post_code}" />
+<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder">
+<tr>
+<td class="thead"><strong>Update Fields</strong></td>
+</tr>
+<tr>
+<td class="trow1">
+<table>
+{\$customfields}
+</table>
+</td>
+</tr>
+</table>
+<br />
+<div align="center">
+<input type="hidden" name="action" value="update" />
+<input type="submit" class="button" value="Update Fields" />
+</div>
+</form>
+EOF;
+
+if ($customfields) {
+    $message .= eval($templates->render("ougcpages_profilefields"));
+}
+
+$cache->cache['profilefields'] = $backup_cache;
+
+$pageData['template'] = $message;
+
+/*
+ *  Below code is pretty much a copy of initShow()
+*/
+// Load custom page language file if exists
+$lang->load("ougc_pages_{$categoryID}", false, true);
+
+if (!empty($pageData)) {
+    $lang->load("ougc_pages_{$pageID}", false, true);
+}
+
+$categoryData['name'] = \htmlspecialchars_uni($categoryData['name']);
+
+if ($categoryData['wrapucp']) {
+    $lang->load('usercp');
+
+    if ($mybb->user['uid'] && $mybb->usergroup['canusercp']) {
+        \add_breadcrumb($lang->nav_usercp, "usercp.php");
+    }
+}
+
+if (!$isPage || $categoryData['breadcrumb']) {
+    \add_breadcrumb($categoryData['name'], \ougc\Pages\Core\categoryGetLink($categoryID));
+}
+
+$navigation = ['previousPage' => '', 'nextPage' => ''];
+
+$lastEditedMessage = '';
+
+$title = $pageName = \htmlspecialchars_uni($pageData['name']);
+
+$description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
+
+$canonicalUrl = \ougc\Pages\Core\pageGetLink($pageID);
+
+\add_breadcrumb($pageName, \ougc\Pages\Core\pageGetLink($pageID));
+
+if (!empty($categoryData['navigation'])) {
+    if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {
+        $previousPageLink = \ougc\Pages\Core\pageGetLink($pagesCache[$pageID]['previousPageID']);
+        $previousPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['previousPageID']]['name']);
+
+        $navigation['previousPage'] = eval($templates->render('ougcpages_navigation_previous'));
+    }
+    if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['nextPageID'])) {
+        $nextPageLink = \ougc\Pages\Core\pageGetLink($pagesCache[$pageID]['nextPageID']);
+        $nextPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['nextPageID']]['name']);
+
+        $navigation['nextPage'] = eval($templates->render('ougcpages_navigation_next'));
+    }
+}
+
+$templates->cache['ougcpages_temporary_tmpl'] = $pageData['template'];
+
+if (!empty($pageData['dateline'])) {
+    $editDateNormal = \my_date('normal', $pageData['dateline']);
+
+    $editDateRelative = \my_date('relative', $pageData['dateline']);
+
+    $lastEditedMessage = eval($templates->render('ougcpages_wrapper_edited'));
+}
+
+$content = eval($templates->render('ougcpages_temporary_tmpl'));
+
+if ($pageData['wrapper']) {
+    $content = eval($templates->render('ougcpages_wrapper'));
+}
+
+if ($categoryData['wrapucp']) {
+    global $usercpnav;
+
+    require_once MYBB_ROOT . 'inc/functions_user.php';
+
+    \usercp_menu();
+
+    $content = eval($templates->render('ougcpages_wrapper_ucp'));
+}
+
+$pageContent = eval($templates->render('ougcpages'));
+
+\output_page($pageContent);
+
+exit;]]></value>
+    </element>
+    <element>
+        <key>versioncode</key>
+        <value type="INT">1833</value>
+    </element>
+</array>
+        <!-- End of file. -->
