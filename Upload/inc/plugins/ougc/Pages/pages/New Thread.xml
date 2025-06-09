@@ -41,25 +41,31 @@
         <key>template</key>
         <value><![CDATA[<?php
 
+global $mybb, $templates, $lang;
+
 $templates->cache(
     'new_thread_modoptions, new_thread_subscription, new_thread_postpoll, post_savedraftbutton, new_thread, codebuttons'
 );
 
-isset($templates->cache['new_thread_modoptions']) or $templates->cache['new_thread_modoptions'] = '<tr>
-<td class="trow2" valign="top"><strong>{$lang->mod_options}</strong>
-<br />
-<label><input type="checkbox" class="checkbox" name="modoptions[closethread]" value="1"{$closecheck} />&nbsp;{$lang->close_thread}</label><br />
-<label><input type="checkbox" class="checkbox" name="modoptions[stickthread]" value="1"{$stickycheck} />&nbsp;{$lang->stick_thread}</label>
-</span></td>
+isset($templates->cache['new_thread_modoptions']) || $templates->cache['new_thread_modoptions'] = '<tr>
+    <td class="trow2" valign="top"><strong>{$lang->mod_options}</strong>
+        <br />
+        <span class="smalltext">
+            <label><input type="checkbox" class="checkbox" name="modoptions[closethread]" value="1"{$closecheck} />&nbsp;{$lang->close_thread}</label><br />
+            <label><input type="checkbox" class="checkbox" name="modoptions[stickthread]" value="1"{$stickycheck} />&nbsp;{$lang->stick_thread}</label>
+        </span>
+    </td>
 </tr>';
-isset($templates->cache['new_thread_subscription']) or $templates->cache['new_thread_subscription'] = '<tr>
+
+isset($templates->cache['new_thread_subscription']) || $templates->cache['new_thread_subscription'] = '<tr>
 <td class="{$bgcolor}" valign="top">{$lang->thread_subscription_method}
 <br />
 	<label><input type="radio" name="postoptions[subscriptionmethod]" value="" style="vertical-align: middle;" checked="checked" /> {$lang->no_subscribe}</label><br />
 	<label><input type="radio" name="postoptions[subscriptionmethod]" value="email" style="vertical-align: middle;" /> {$lang->instant_email_subscribe}</label><br />
 </td>
 </tr>';
-isset($templates->cache['new_thread_postpoll']) or $templates->cache['new_thread_postpoll'] = '<tr>
+
+isset($templates->cache['new_thread_postpoll']) || $templates->cache['new_thread_postpoll'] = '<tr>
 <td class="trow1" valign="top">
 <strong>{$lang->poll}</strong><br /><span class="smalltext">{$lang->poll_desc}</span>
 <br />
@@ -67,8 +73,10 @@ isset($templates->cache['new_thread_postpoll']) or $templates->cache['new_thread
 {$lang->num_options} <input type="text" class="textbox" name="numpolloptions" value="" size="10" /> {$lang->max_options}</span>
 </td>
 </tr>';
-isset($templates->cache['post_savedraftbutton']) or $templates->cache['post_savedraftbutton'] = '';
-isset($templates->cache['new_thread']) or $templates->cache['new_thread'] = '<html>
+
+isset($templates->cache['post_savedraftbutton']) || $templates->cache['post_savedraftbutton'] = '';
+
+isset($templates->cache['new_thread']) || $templates->cache['new_thread'] = '<html>
 <head>
     <title>{$lang->newthread_in}</title>
     {$headerinclude}
@@ -90,13 +98,13 @@ isset($templates->cache['new_thread']) or $templates->cache['new_thread'] = '<ht
         <tr>
             <td class="trow1">
                 <strong>{$lang->thread_subject}</strong><br/>
-                <input type="text" class="textbox" name="subject" size="40" maxlength="85" value="" tabindex="1"/>
+                <input type="text" class="textbox" name="subject" size="40" maxlength="85" value="{$subject}" tabindex="1"/>
             </td>
         </tr>
         <tr>
             <td class="trow1">
                 <strong>{$lang->your_message}</strong><br/>
-                <textarea name="message" id="message" rows="20" cols="70" tabindex="2"></textarea>
+                <textarea name="message" id="message" rows="20" cols="70" tabindex="2">{$message}</textarea>
                 {$codebuttons}
             </td>
         </tr>
@@ -105,8 +113,8 @@ isset($templates->cache['new_thread']) or $templates->cache['new_thread'] = '<ht
             <td class="trow2">
                 <strong>{$lang->post_options}</strong><br/>
                 <span class="smalltext">
-                <label><input type="checkbox" class="checkbox" name="postoptions[signature]" value="1" tabindex="7"/>{$lang->options_sig}</label>
-            </span>
+                    <label><input type="checkbox" class="checkbox" name="postoptions[signature]" value="1" tabindex="7"/>{$lang->options_sig}</label>
+                </span>
             </td>
         </tr>
         {$modoptions}
@@ -131,49 +139,68 @@ isset($templates->cache['new_thread']) or $templates->cache['new_thread'] = '<ht
 </body>
 </html>';
 
+$subject = htmlspecialchars_uni($mybb->get_input('subject'));
 
-$lang->load("newthread", false, true);
+$message = htmlspecialchars_uni($mybb->get_input('message'));
+
+$lang->load('newthread', false, true);
+
 $lang->newthread_in = $lang->sprintf($lang->newthread_in, $mybb->settings['bbname']);
+
 $lang->max_options = $lang->sprintf($lang->max_options, $mybb->settings['maxpolloptions']);
-add_breadcrumb("New Thread", "new.php");
+
+$pageName = htmlspecialchars_uni($pageData['name']);
+
+add_breadcrumb($pageName, \ougc\Pages\Core\pageGetLink($pageID));
 
 $codebuttons = build_mycode_inserter();
-$modoptions = $mybb->get_input('modoptions', \MyBB::INPUT_ARRAY);
+
+$modoptions = $mybb->get_input('modoptions', MyBB::INPUT_ARRAY);
+
 if (!empty($modoptions['closethread'])) {
-    $closecheck = "checked=\"checked\"";
+    $closecheck = 'checked="checked"';
 } else {
     $closecheck = '';
 }
 if (!empty($modoptions['stickthread'])) {
-    $stickycheck = "checked=\"checked\"";
+    $stickycheck = 'checked="checked"';
 } else {
     $stickycheck = '';
 }
-unset($modoptions);
-$bgcolor = alt_trow();
-eval("\$modoptions = \"" . $templates->get("new_thread_modoptions") . "\";");
-eval("\$subscriptionmethod = \"" . $templates->get("new_thread_subscription") . "\";");
-eval("\$pollbox = \"" . $templates->get("new_thread_postpoll") . "\";");
-eval("\$savedraftbutton = \"" . $templates->get("post_savedraftbutton", 1, 0) . "\";");
 
-$forum_cache = $cache->read("forums");
+unset($modoptions);
+
+$bgcolor = alt_trow();
+
+$modoptions = eval($templates->render('new_thread_modoptions'));
+
+$subscriptionmethod = eval($templates->render('new_thread_subscription'));
+
+$pollbox = eval($templates->render('new_thread_postpoll'));
+
+$savedraftbutton = eval($templates->render('post_savedraftbutton'));
+
+$forum_cache = $mybb->cache->read('forums');
 
 $forum_list = '';
+
 foreach ($forum_cache as $fid => $forum) {
-    if ($forum['type'] != "c") {
-        $forum_list .= "<option value=\"" . $fid . "\">" . htmlspecialchars_uni($forum['name']) . "</option>";
+    if ($forum['type'] !== 'c') {
+        $forum_list .= "<option value=\"{$fid}\">" . htmlspecialchars_uni($forum['name']) . '</option>';
     }
 }
 
-$forumsselected = "<select name=\"fid\">" . $forum_list . "</select>";
+$forumsselected = '<select name="fid">' . $forum_list . '</select>';
 
-eval("\$page_new_thread = \"" . $templates->get("new_thread", 1, 0) . "\";");
+$page_new_thread = eval($templates->render('new_thread'));
+
 output_page($page_new_thread);
+
 exit;]]></value>
     </element>
     <element>
         <key>versioncode</key>
-        <value type="INT">1833</value>
+        <value type="INT">1834</value>
     </element>
 </array>
         <!-- End of file. -->
