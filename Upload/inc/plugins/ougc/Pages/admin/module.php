@@ -343,19 +343,30 @@ if ($mybb->get_input('manage') == 'pages') {
 
         $info = ougc_pages_info();
 
-        $file = $PL->xml_export([
-            'name' => $page['name'],
-            'description' => $page['description'],
-            'url' => $page['url'],
-            'allowedGroups' => $page['allowedGroups'],
-            'php' => $page['php'],
-            'wol' => $page['wol'],
-            'visible' => $page['visible'],
-            'wrapper' => $page['wrapper'],
-            'init' => $page['init'],
-            'template' => $page['template'],
-            'versioncode' => $info['versioncode']
-        ], 'OUGC_Pages_' . $page['name'] . '_' . $info['versioncode'] . '.xml');
+        $pageConfig = [];
+
+        foreach (\ougc\Pages\Admin\FIELDS_DATA_PAGES as $fieldName => $fieldData) {
+            if (empty($fieldData['export']) || !isset($page[$fieldName])) {
+                continue;
+            }
+
+            if (isset($fieldData['default']) && (in_array(
+                        $fieldData['type'],
+                        ['VARCHAR', 'MEDIUMTEXT']
+                    ) && (string)$page[$fieldName] === (string)$fieldData['default'] ||
+                    in_array(
+                        $fieldData['type'],
+                        ['TINYINT', 'SMALLINT']
+                    ) && (int)$page[$fieldName] === (int)$fieldData['default'])) {
+                continue;
+            }
+
+            $pageConfig[$fieldName] = $page[$fieldName];
+        }
+
+        $pageConfig['versioncode'] = $info['versioncode'];
+
+        $file = $PL->xml_export($pageConfig, 'ougcPages_' . $page['name'] . '_' . $info['versioncode'] . '.xml');
     } elseif ($mybb->get_input('action') == 'import') {
         $page->add_breadcrumb_item(htmlspecialchars_uni($categoryData['name']));
 

@@ -168,6 +168,7 @@ erDiagram
         int wrapper "1 to use a page wrapper"
         int wol "1 to update session location"
         int php "1 for PHP pages"
+        int parseMyCode "1 for parsing the template using the post parser"
         int classicTemplate "1 for using a theme template"
         int init "Initialization point"
         string template "Page contents"
@@ -492,6 +493,7 @@ Provides a list of available variables, functions, and methods for plugins to us
     - `(int) wrapper`
     - `(int) wol`
     - `(int) php`
+    - `(int) parseMyCode`
     - `(int) classicTemplate`
     - `(int) init`
     - `(int) dateline`
@@ -523,6 +525,7 @@ Provides a list of available variables, functions, and methods for plugins to us
     - `(int) wrapper`
     - `(int) wol`
     - `(int) php`
+    - `(int) parseMyCode`
     - `(int) classicTemplate`
     - `(int) init`
     - `(string) template`
@@ -572,6 +575,7 @@ Provides a list of available variables, functions, and methods for plugins to us
         - `(int) wrapper`
         - `(int) wol`
         - `(int) php`
+        - `(int) parseMyCode`
         - `(int) classicTemplate`
         - `(int) init`
         - `(string) template`

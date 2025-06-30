@@ -40,7 +40,17 @@ defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
 
 // Plugin Settings
 define('ougc\Pages\Core\SETTINGS', [
-    'enableEval' => true
+    'enableEval' => true,
+    'parserOptions' => [
+        'allow_html' => true,
+        'allow_mycode' => true,
+        'allow_smilies' => true,
+        'allow_imgcode' => true,
+        'allow_videocode' => true,
+        #"nofollow_on" => true,
+        'filter_badwords' => true,
+        'nl2br' => true,
+    ]
 ]);
 
 define('ougc\Pages\DEBUG', false);

@@ -7,26 +7,14 @@
     </element>
     <element>
         <key>description</key>
-        <value>Basic PHP page that uses the MyBB parser meant to serve as reference.</value>
+        <value>Basic PHP page that uses the MyBB parser.</value>
     </element>
     <element>
         <key>url</key>
         <value>php-test-page</value>
     </element>
     <element>
-        <key>allowedGroups</key>
-        <value>-1</value>
-    </element>
-    <element>
         <key>php</key>
-        <value type="INT">1</value>
-    </element>
-    <element>
-        <key>wol</key>
-        <value type="INT">1</value>
-    </element>
-    <element>
-        <key>visible</key>
         <value type="INT">1</value>
     </element>
     <element>
@@ -34,21 +22,10 @@
         <value type="INT">0</value>
     </element>
     <element>
-        <key>init</key>
-        <value type="INT">4</value>
-    </element>
-    <element>
         <key>template</key>
         <value><![CDATA[<?php
 
-$parser_options = [
-    'allow_html' => 1,
-    'allow_mycode' => 1,
-    'allow_smilies' => 1,
-    'allow_imgcode' => 1,
-    'allow_videocode' => 1,
-    'filter_badwords' => 1,
-];
+$parser_options = getSetting('parserOptions');
 
 $message = 'For those who don\'t know.
 
@@ -70,15 +47,16 @@ isset($templates->cache['ougcpages_parser_test_page']) or $templates->cache['oug
 
 if (!is_object($parser)) {
     require_once MYBB_ROOT . 'inc/class_parser.php';
+
     $parser = new \postParser;
 }
 
-if ($mybb->user['showimages'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestimages'] != 1 && $mybb->user['uid'] == 0) {
-    $parser_options['allow_imgcode'] = 0;
+if (!empty($mybb->user['uid']) && empty($mybb->user['showimages']) || empty($mybb->user['uid']) && empty($mybb->settings['guestimages'])) {
+    $parser_options['allow_imgcode'] = false;
 }
 
-if ($mybb->user['showvideos'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestvideos'] != 1 && $mybb->user['uid'] == 0) {
-    $parser_options['allow_videocode'] = 0;
+if (!empty($mybb->user['uid']) && empty($mybb->user['showvideos']) || empty($mybb->user['uid']) && empty($mybb->settings['guestimages'])) {
+    $parser_options['allow_videocode'] = false;
 }
 
 $message = $parser->parse_message($message, $parser_options);

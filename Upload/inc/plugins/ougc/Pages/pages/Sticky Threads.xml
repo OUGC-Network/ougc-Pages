@@ -189,7 +189,7 @@ $queryStart = \ougc\Pages\Core\getQueryStart();
 // Start Getting Threads
 $query = $db->query(
     "
-	SELECT t.*, t.username AS threadusername, u.username
+	SELECT t.closed, t.visible, t.author, t.uid, t.threadusername, t.prefix, t.subject, t.poll, t.replies, t.unapprovedposts, t.deletedposts, t.tid, t.lastposter, t.closed,, t.lastposteruid, t.lastpost, t.views, t.username AS threadusername, u.username
 	FROM " . TABLE_PREFIX . "threads t
 	LEFT JOIN " . TABLE_PREFIX . "users u ON (u.uid = t.uid)
 	WHERE t.sticky='1' AND {$unapproved_where} {$permsql} AND t.closed NOT LIKE 'moved|%'

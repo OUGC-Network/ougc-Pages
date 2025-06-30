@@ -145,14 +145,16 @@ const FIELDS_DATA_PAGES = [
         'formType' => 'textBox',
         'size' => 100,
         'cache' => true,
-        'required' => true
+        'required' => true,
+        'export' => true,
     ],
     'description' => [
         'type' => 'VARCHAR',
         'formType' => 'textBox',
         'size' => 255,
         'cache' => true,
-        'required' => true
+        'required' => true,
+        'export' => true,
     ],
     'url' => [
         'type' => 'VARCHAR',
@@ -160,14 +162,16 @@ const FIELDS_DATA_PAGES = [
         'size' => 100,
         'unique' => true,
         'cache' => true,
-        'required' => true
+        'required' => true,
+        'export' => true,
     ],
     'allowedGroups' => [
         'type' => 'VARCHAR',
         'formType' => 'groupSelect',
         'size' => 255,
         'cache' => true,
-        'default' => -1
+        'default' => -1,
+        'export' => true,
     ],
     'disporder' => [
         'type' => 'SMALLINT',
@@ -184,47 +188,62 @@ const FIELDS_DATA_PAGES = [
         'formType' => 'yesNo',
         'unsigned' => true,
         'default' => 1,
-        'cache' => true
+        'cache' => true,
+        'export' => true,
     ],
     'wrapper' => [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
         'default' => 1,
-        'cache' => true
+        'cache' => true,
+        'export' => true,
     ],
     'wol' => [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
         'default' => 1,
-        'cache' => true
+        'cache' => true,
+        'export' => true,
     ],
     'php' => [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
         'default' => 0,
-        'cache' => true
+        'cache' => true,
+        'export' => true,
+    ],
+    'parseMyCode' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 0,
+        'cache' => true,
+        'export' => true,
     ],
     'classicTemplate' => [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
         'default' => 0,
-        'cache' => true
+        'cache' => true,
+        'export' => true,
     ],
     'init' => [
         'type' => 'TINYINT',
         'formType' => 'basicSelect',
         'unsigned' => true,
         'default' => EXECUTION_HOOK_GLOBAL_END,
-        'cache' => true
+        'cache' => true,
+        'export' => true,
     ],
     'template' => [
         'type' => 'MEDIUMTEXT',
         'formType' => 'textArea',
-        'null' => true
+        'null' => true,
+        'export' => true,
     ],
     'dateline' => [
         'type' => 'INT',
@@ -431,7 +450,6 @@ function pluginUninstall()
     change_admin_permission('config', 'ougc_pages', -1);
 }
 
-
 function dbVerifyTables()
 {
     global $db;
@@ -491,7 +509,6 @@ function dbVerifyIndexes()
         }
     }
 }
-
 
 function dbTables(): array
 {

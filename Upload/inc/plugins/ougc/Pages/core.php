@@ -30,6 +30,7 @@ namespace ougc\Pages\Core;
 
 use MyBB;
 use pluginSystem;
+use postParser;
 use session;
 
 use function ougc\Pages\Admin\pluginInfo;
@@ -828,6 +829,28 @@ function initShow()
             }
         }
 
+        if (!empty($pageData['parseMyCode'])) {
+            global $parser;
+
+            if (!($parser instanceof postParser)) {
+                require_once MYBB_ROOT . 'inc/class_parser.php';
+
+                $parser = new postParser();
+            }
+
+            $parserOptions = getSetting('parserOptions');
+
+            if (!empty($mybb->user['uid']) && empty($mybb->user['showimages']) || empty($mybb->user['uid']) && empty($mybb->settings['guestimages'])) {
+                $parserOptions['allow_imgcode'] = false;
+            }
+
+            if (!empty($mybb->user['uid']) && empty($mybb->user['showvideos']) || empty($mybb->user['uid']) && empty($mybb->settings['guestimages'])) {
+                $parserOptions['allow_videocode'] = false;
+            }
+
+            $pageData['template'] = $parser->parse_message($pageData['template'], $parserOptions);
+        }
+
         $templates->cache['ougcpages_temporary_tmpl'] = $pageData['template'];
 
         if (!empty($pageData['dateline'])) {
@@ -841,7 +864,7 @@ function initShow()
         $content = eval(templateGet('temporary_tmpl'));
 
         // todo, parse message if setting ?
-        
+
         if ($pageData['wrapper']) {
             $content = eval(templateGet('wrapper'));
         }
@@ -1151,7 +1174,30 @@ function pageGet(int $pageID, string $pageUrl = ''): array
             $whereConditions[] = "url='{$db->escape_string($pageUrl)}'";
         }
 
-        $pageData = pageQuery(['*'], $whereConditions, ['limit' => 1]);
+        $pageData = pageQuery
+        (
+            [
+                'pid',
+                'cid',
+                'name',
+                'description',
+                'url',
+                'allowedGroups',
+                'disporder',
+                'visible',
+                'menuItem',
+                'wrapper',
+                'wol',
+                'php',
+                'parseMyCode',
+                'classicTemplate',
+                'init',
+                'template',
+                'dateline'
+            ],
+            $whereConditions,
+            ['limit' => 1]
+        );
 
         if ($pageData && isset($pageData[0]['pid'])) {
             $cacheObject[$pageID] = $pageData[0];

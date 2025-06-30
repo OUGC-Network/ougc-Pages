@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MyBB PluginLibrary XML-Export :: 2025-06-30T14:08:18+00:00 -->
+<array>
+    <element>
+        <key>name</key>
+        <value>MyCode Page</value>
+    </element>
+    <element>
+        <key>description</key>
+        <value>Basic MyCode page that uses the post parser.</value>
+    </element>
+    <element>
+        <key>url</key>
+        <value>mycode</value>
+    </element>
+    <element>
+        <key>parseMyCode</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>template</key>
+        <value><![CDATA[For those who don't know.
+
+[quote='WikiPedia']<b>MyBB</b>, [i]originally[/i] <b>MyBulletinBoard</b>, is a [url=http://en.wikipedia.org/wiki/Free_and_open-source_software]free and open source[/url] [url=http://en.wikipedia.org/wiki/Forum_software]forum software[/url] which is developed by the MyBB Group. It is written in <a href="http://en.wikipedia.org/wiki/PHP">PHP</a>, supports [url=http://en.wikipedia.org/wiki/MySQL]MySQL[/url], [url=http://en.wikipedia.org/wiki/PostgreSQL]PostgreSQL[/url] and [url=http://en.wikipedia.org/wiki/SQLite]SQLite[/url] as [url=http://en.wikipedia.org/wiki/Database]database[/url] systems and has database [url=http://en.wikipedia.org/wiki/Failover]failover[/url] support. It is licensed under the [url=http://en.wikipedia.org/wiki/LGPL]LGPL[/url].[/quote]
+
+:)]]></value>
+    </element>
+    <element>
+        <key>versioncode</key>
+        <value type="INT">1834</value>
+    </element>
+</array>
+        <!-- End of file. -->
