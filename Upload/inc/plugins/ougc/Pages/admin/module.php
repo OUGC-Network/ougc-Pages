@@ -345,7 +345,7 @@ if ($mybb->get_input('manage') == 'pages') {
 
         $pageConfig = [];
 
-        foreach (\ougc\Pages\Admin\FIELDS_DATA_PAGES as $fieldName => $fieldData) {
+        foreach (FIELDS_DATA_PAGES as $fieldName => $fieldData) {
             if (empty($fieldData['export']) || !isset($page[$fieldName])) {
                 continue;
             }

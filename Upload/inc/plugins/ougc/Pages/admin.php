@@ -30,6 +30,8 @@ namespace ougc\Pages\Admin;
 
 use MyBB;
 use DirectoryIterator;
+use Form;
+use FormContainer;
 
 use function ougc\Pages\Core\cacheUpdate;
 use function ougc\Pages\Core\loadLanguage;
@@ -654,8 +656,8 @@ function pageFormCheckFields(
 }
 
 function categoryFormBuildFields(
-    object &$formContainer,
-    object &$formObject,
+    FormContainer &$formContainer,
+    Form &$formObject,
     array $basicSelectItems = [],
     string $errorIdentifier = 'category',
     array $fieldsData = FIELDS_DATA_CATEGORIES
@@ -664,8 +666,8 @@ function categoryFormBuildFields(
 }
 
 function pageFormBuildFields(
-    object &$formContainer,
-    object &$formObject,
+    FormContainer &$formContainer,
+    Form &$formObject,
     array $basicSelectItems = [],
     string $errorIdentifier = 'page',
     array $fieldsData = FIELDS_DATA_PAGES
