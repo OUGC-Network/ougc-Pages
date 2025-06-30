@@ -42,6 +42,7 @@
         <value><![CDATA[<?php
 
 global $mybb, $templates, $lang;
+global $pageData, $pageID;
 
 $templates->cache(
     'new_thread_modoptions, new_thread_subscription, new_thread_postpoll, post_savedraftbutton, new_thread, codebuttons'
@@ -56,7 +57,6 @@ isset($templates->cache['new_thread_modoptions']) || $templates->cache['new_thre
         </span>
     </td>
 </tr>';
-
 isset($templates->cache['new_thread_subscription']) || $templates->cache['new_thread_subscription'] = '<tr>
 <td class="{$bgcolor}" valign="top">{$lang->thread_subscription_method}
 <br />
@@ -64,7 +64,6 @@ isset($templates->cache['new_thread_subscription']) || $templates->cache['new_th
 	<label><input type="radio" name="postoptions[subscriptionmethod]" value="email" style="vertical-align: middle;" /> {$lang->instant_email_subscribe}</label><br />
 </td>
 </tr>';
-
 isset($templates->cache['new_thread_postpoll']) || $templates->cache['new_thread_postpoll'] = '<tr>
 <td class="trow1" valign="top">
 <strong>{$lang->poll}</strong><br /><span class="smalltext">{$lang->poll_desc}</span>
@@ -73,9 +72,7 @@ isset($templates->cache['new_thread_postpoll']) || $templates->cache['new_thread
 {$lang->num_options} <input type="text" class="textbox" name="numpolloptions" value="" size="10" /> {$lang->max_options}</span>
 </td>
 </tr>';
-
 isset($templates->cache['post_savedraftbutton']) || $templates->cache['post_savedraftbutton'] = '';
-
 isset($templates->cache['new_thread']) || $templates->cache['new_thread'] = '<html>
 <head>
     <title>{$lang->newthread_in}</title>
@@ -185,9 +182,25 @@ $forum_cache = $mybb->cache->read('forums');
 $forum_list = '';
 
 foreach ($forum_cache as $fid => $forum) {
-    if ($forum['type'] !== 'c') {
-        $forum_list .= "<option value=\"{$fid}\">" . htmlspecialchars_uni($forum['name']) . '</option>';
+    $forumPermissions = forum_permissions($fid);
+
+    if (empty($forum['open']) ||
+        $forum['type'] !== 'f' ||
+        $forum['linkto'] !== '' ||
+        empty($forumPermissions['canview']) ||
+        empty($forumPermissions['canpostthreads'])) {
+        continue;
     }
+
+    $selectedElement = '';
+
+    if ((int)$fid === $mybb->get_input('fid', \MyBB::INPUT_INT)) {
+        $selectedElement = 'selected="selected"';
+    }
+
+    $forum_list .= '<option value="' . $fid . '"' . $selectedElement . '>' . htmlspecialchars_uni(
+            $forum['name']
+        ) . '</option>';
 }
 
 $forumsselected = '<select name="fid">' . $forum_list . '</select>';
